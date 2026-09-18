@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		
+		<title>ImgBeamer</title>
+
+		<link rel="icon" href="src/img/favicon.ico" type="image/x-icon" />
+
+		<link rel="stylesheet" href="src/3rd-party/jquery-ui-1.13.2.custom/jquery-ui.min.css">
+		<link rel="stylesheet" href="src/3rd-party/jquery-ui-menubar/menubar.css">
+		<link rel="stylesheet" href="src/css/style.css">
+
+		<script src="src/3rd-party/konva/v9.3.2/konva.min.js"></script>
+		<script src="src/3rd-party/jquery-3.6.1.min.js"></script>
+		<script src="src/3rd-party/jquery-ui-1.13.2.custom/jquery-ui.min.js"></script>
+		<script src="src/3rd-party/jquery-dialogextend/jquery.dialogextend.v2.0.4.min.js"></script>
+		<script src="src/3rd-party/jquery-ui-menubar/menubar.js"></script>
+		<script src="src/3rd-party/dat.gui/dat.gui.min.js"></script>
+		<script src="src/3rd-party/UTIF.js"></script>
+		<script src="src/3rd-party/image-ms-ssim.js"></script>
+	</head>
+	<body>
+		<ul id="menubar" class="menubar">
+			<li>
+				<div>File</div>
+				<ul>
+					<li><div><span class="ui-icon ui-icon-folder-open"></span>Import Image</div></li>
+					<!-- <li class="ui-state-disabled"><div>Open (disabled)</div></li> -->
+					<li>
+						<div><span class="ui-icon ui-icon-bookmark"></span>Open Preloaded...</div>
+						<ul id="menu_preloaded_images">
+							<!-- <li><div><span class="ui-icon ui-icon-document"></span>File A</div></li> -->
+							<!-- <li><div><span class="ui-icon ui-icon-document"></span>File B</div></li> -->
+							<!-- <li><div><span class="ui-icon ui-icon-document"></span>File C</div></li> -->
+						</ul>
+					</li>
+					<li>----</li>
+					<li><div><span class="ui-icon ui-icon-disk"></span>Save Image</div></li>
+					<li><div><span class="ui-icon ui-icon-disk"></span>Save Image (actual size)</div></li>
+					<li>----</li>
+					<li><div><span class="ui-icon ui-icon-power"></span>Quit</div></li>
+				</ul>
+			</li>
+			<li>
+				<div>View</div>
+				<ul>
+					<li>
+						<div>
+							<label>
+								<input type="checkbox" autocomplete="off" id="cb_hide_options">
+								Hide Options Window
+							</label>
+						</div>
+					</li>
+					<li>
+						<div>
+							<label>
+								<input type="checkbox" autocomplete="off" id="cb_advanced_mode">
+								Advanced Mode
+							</label>
+						</div>
+					</li>
+					<li>
+						<div>
+							<label>
+								<input type="checkbox" autocomplete="off" id="cb_use_image_smoothing">
+								Use Image Smoothing
+							</label>
+						</div>
+					</li>
+					<li>----</li>
+					<li>
+						<div>
+							<label>
+								<input type="checkbox" autocomplete="off" id="cb_snap_displays">
+								Snap Displays to Grid
+							</label>
+						</div>
+					</li>
+					<li><div><span class="ui-icon ui-icon-newwin"></span>Tile Displays</div></li>
+				</ul>
+			</li>
+			<li>
+				<div>Help</div>
+				<ul>
+					<li><div><span class="ui-icon ui-icon-help"></span>Quick-Start Guide</div></li>
+					<li><div><span class="ui-icon ui-icon-home"></span>Homepage</div></li>
+					<li>----</li>
+					<li><div><span class="ui-icon ui-icon-info"></span>About</div></li>
+				</ul>
+			</li>
+		</ul>
+
+		<!-- Needs to included here since it adds the images to the menubar and preloads some -->
+		<script src="src/testimages/images.js"></script>
+
+		<div class="layout" id="main-container"></div>
+
+		<div id="options-anchor">
+			<div id="options">
+				<div id="options-handle">&#9776;</div>
+				<input type="file" id="_fileImgInput" accept="image/*" style="display: none;" />
+			</div>
+		</div>
+
+		<div id="options-full-resample-anchor" style="display: none;">
+			<div id="options-full-resample">
+				<details>
+					<summary>Full Resample Panel</summary>
+					<table>
+						<tr>
+							<td>Cell Width</td>
+							<td><input type="number" id="iCellW" placeholder="10"> px</td>
+						</tr>
+						<tr>
+							<td>Cell Height</td>
+							<td><input type="number" id="iCellH" placeholder="10"> px</td>
+						</tr>
+						<tr>
+							<td>Spot Size X</td>
+							<td><input type="number" id="iSpotX" placeholder="60"> %</td>
+						</tr>
+						<tr>
+							<td>Spot Size Y</td>
+							<td><input type="number" id="iSpotY" placeholder="60"> %</td>
+						</tr>
+						<tr>
+							<td>Spot Angle (clockwise)</td>
+							<td><input type="number" id="iSpotAngle" placeholder="0"> deg.</td>
+						</tr>
+						<tr>
+							<td>Resample Fully</td>
+							<td>
+								<button id="generateFull">Generate</button>
+								<svg id="loadspinner_full" class="load_spinner_svg"
+									style="display:none"
+									xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid" viewBox="0 0 16 16">
+									<circle fill="none" stroke="#00d8ff" stroke-dasharray="28.274333882308138 11.42477796076938" cx="8" cy="8" r="6" stroke-width="2">
+									<animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" keyTimes="0;1" values="0 8 8;360 8 8" dur="1s"></animateTransform>
+									</circle>
+								</svg>
+							</td>
+						</tr>
+						<tr>
+							<td>Status</td>
+							<td>
+								<pre id="status">-</pre>
+							</td>
+						</tr>
+					</table>
+				</details>
+			</div>
+		</div>
+
+		<!-- Functions -->
+		<script src="src/utils.js"></script>
+		<script src="src/layout.js"></script>
+		<script src="src/drawsteps.js"></script>
+		<script src="src/img_metrics.js"></script>
+
+		<!-- Main execution -->
+		<script src="src/main.js" defer></script>
+		<!-- Options window / toolbox -->
+		<script src="src/gui.js" defer></script>
+	</body>
+</html>
